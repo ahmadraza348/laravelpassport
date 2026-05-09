@@ -17,4 +17,10 @@ Route::prefix('auth')
         Route::post('/register', 'register');
         Route::post('/login', 'login');
 
+        Route::middleware('auth:api')->group(function () {
+        Route::get('/user-profile', 'userProfile');
+        Route::get('/logout', 'logout');
+        });
+
+
 });

@@ -29,10 +29,9 @@ class AuthController extends Controller
                 $user,
                 201
             );
-
         } catch (Exception $e) {
 
-            Log::error('Register Error: '.$e->getMessage());
+            Log::error('Register Error: ' . $e->getMessage());
 
             return ApiResponse::error(
                 self::EXCEPTION_MESSAGE,
@@ -62,16 +61,71 @@ class AuthController extends Controller
                 self::SUCCESS_MESSAGE,
                 $response
             );
-
         } catch (Exception $e) {
 
-            Log::error('Login Error: '.$e->getMessage());
+            Log::error('Login Error: ' . $e->getMessage());
 
             return ApiResponse::error(
                 self::EXCEPTION_MESSAGE,
                 [],
                 500
             );
+        }
+    }
+
+    public function userProfile()
+    {
+
+        try {
+
+            $authUser = $this->authService->userProfile();
+            if (!$authUser) {
+                return ApiResponse::error(
+                    self::USER_NOT_FOUND,
+                    [],
+                    404
+                );
+            }
+            return ApiResponse::success(
+                self::SUCCESS_MESSAGE,
+                $authUser,
+                200
+            );
+        } catch (Exception $e) {
+            Log::error('User Profile Error: ' . $e->getMessage());
+            return ApiResponse::error(
+                self::EXCEPTION_MESSAGE,
+                [],
+                500
+            );
+        }
+    }
+
+    public function logout()
+    {
+        try {
+          $response = $this->authService->userLogout();
+            if (!$response) {
+                return ApiResponse::error(
+                    self::USER_NOT_FOUND,
+                    [],
+                    404
+                );
+            }
+            return ApiResponse::success(
+                self::LOGOUT_SUCCESS,
+                [],
+                200
+            );
+          
+        } catch (Exception $e) {
+            Log::error('Logout Error: ' . $e->getMessage());
+            return ApiResponse::error(
+                self::EXCEPTION_MESSAGE,
+                [],
+                500
+            );
+           
         }
     }
 }

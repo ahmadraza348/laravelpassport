@@ -9,6 +9,9 @@ abstract class Controller
     public const EXCEPTION_MESSAGE = 'Something went wrong';
     public const UNAUTHORIZED_MESSAGE = 'Unauthorized access';
     public const INVALID_CREDENTIALS = 'Invalid credentials';
+    public const USER_NOT_FOUND = 'User not found';
+    public const USER_ALREADY_EXISTS = 'User already exists';
+    public const LOGOUT_SUCCESS = 'Successfully logged out';
 
     public const SUCCESS_STATUS = 'success';
     public const ERROR_STATUS = 'error';
