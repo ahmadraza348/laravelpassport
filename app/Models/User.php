@@ -26,6 +26,12 @@ class User extends Authenticatable implements OAuthenticatable
         'password',
     ];
 
+
+    public function todos()
+    {
+        return $this->hasMany(todo::class, 'user_id', 'id');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
