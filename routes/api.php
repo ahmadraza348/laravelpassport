@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\TodoController;
 
 
 Route::get('/user', function (Request $request) {
@@ -20,7 +21,9 @@ Route::prefix('auth')
         Route::middleware('auth:api')->group(function () {
         Route::get('/user-profile', 'userProfile');
         Route::get('/logout', 'logout');
+
         });
+        Route::resource('todos', TodoController::class);
 
 
 });

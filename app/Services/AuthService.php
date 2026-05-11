@@ -39,18 +39,23 @@ class AuthService
         ];
     }
 
-    public function userProfile(){
+    public function userProfile()
+    {
         return Auth::user();
     }
 
-    public function userLogout(){
+    public function userLogout()
+    {
         $authUser = Auth::user();
         if ($authUser) {
             $authUser->token()->revoke();
             return true;
         }
         return false;
-    
-    
+    }
+
+    public function getAuthUser()
+    {
+        return Auth::user();
     }
 }
