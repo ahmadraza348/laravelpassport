@@ -4,98 +4,64 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\TodoService;
-use App\Models\Todo;
-use Illuminate\Support\Facades\Log;
-use Exception;
 use App\Helper\ApiResponse;
 use App\Http\Requests\StoreTodoRequest;
+use Exception;
+use Illuminate\Support\Facades\Log;
 
 class TodoController extends Controller
 {
-
     public function __construct(protected TodoService $todoService) {}
-
-
 
     public function index()
     {
         try {
             $todos = $this->todoService->getAllTodos();
-              return ApiResponse::success(
-                self::SUCCESS_MESSAGE,
-                $todos,
-                201
-            );
-
+            return ApiResponse::success(self::SUCCESS_MESSAGE, $todos);
         } catch (Exception $e) {
-            Log::error('Error on Fetching Todos: ' . $e->getMessage());
-            return ApiResponse::error(
-                self::EXCEPTION_MESSAGE,
-                [],
-                500
-            );
+            Log::error('Error Fetching Todos: ' . $e->getMessage());
+            return ApiResponse::error(self::EXCEPTION_MESSAGE, [], 500);
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreTodoRequest $request)
     {
-         try {
-            $this->todoService->storeTodo($request);
-              return ApiResponse::success(
-                self::SUCCESS_MESSAGE,
-                201
-            );
-
+        try {
+            $todo = $this->todoService->storeTodo($request);
+            return ApiResponse::success(self::SUCCESS_MESSAGE, $todo, 201);
         } catch (Exception $e) {
-            Log::error('Error on Storing Todos: ' . $e->getMessage());
-            return ApiResponse::error(
-                self::EXCEPTION_MESSAGE,
-                [],
-                500
-            );
+            Log::error('Error Storing Todo: ' . $e->getMessage());
+            return ApiResponse::error(self::EXCEPTION_MESSAGE, [], 500);
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Todo $todo)
+    public function show($id)
     {
-        //
+        try {
+            $todo = $this->todoService->getTodoById($id);
+            return ApiResponse::success(self::SUCCESS_MESSAGE, $todo);
+        } catch (Exception $e) {
+            return ApiResponse::error('Todo not found', [], 404);
+        }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Todo $todo)
+    public function update(Request $request, $id)
     {
-        //
+        try {
+            $todo = $this->todoService->updateTodo($id, $request);
+            return ApiResponse::success('Todo updated successfully', $todo);
+        } catch (Exception $e) {
+            return ApiResponse::error('Update failed: ' . $e->getMessage(), [], 400);
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Todo $todo)
+    public function destroy($id)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(todo $todo)
-    {
-        //
+        try {
+            $this->todoService->deleteTodo($id);
+            return ApiResponse::success('Todo deleted successfully');
+        } catch (Exception $e) {
+            return ApiResponse::error('Deletion failed', [], 400);
+        }
     }
 }

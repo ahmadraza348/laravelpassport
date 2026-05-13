@@ -11,19 +11,15 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:api');
 
 
-Route::prefix('auth')
-    ->controller(AuthController::class)
-    ->group(function () {
+Route::prefix('auth')->controller(AuthController::class)->group(function () {
+    Route::post('/register', 'register');
+    Route::post('/login', 'login');
 
-        Route::post('/register', 'register');
-        Route::post('/login', 'login');
-
-        Route::middleware('auth:api')->group(function () {
+    Route::middleware('auth:api')->group(function () {
         Route::get('/user-profile', 'userProfile');
         Route::get('/logout', 'logout');
-
-        });
-        Route::resource('todos', TodoController::class);
-
-
+        
+        // Move this inside the auth middleware!
+        Route::apiResource('todos', TodoController::class);
+    });
 });
