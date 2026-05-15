@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Todo;
 use App\Repository\TodoRepository;
 
 class TodoService
@@ -11,34 +12,42 @@ class TodoService
         protected AuthService $authService
     ) {}
 
+    private function user()
+    {
+        return $this->authService->getAuthUser();
+    }
+
+    public function getCurrentUserId()
+    {
+        $user = $this->user();
+        return $user ? $user->id : null;
+    }
+
     public function getAllTodos()
     {
-        $authUser = $this->authService->getAuthUser();
-        return $this->todoRepository->getAllTodos($authUser);
+        return $this->todoRepository->getAllTodos(
+            $this->user()
+        );
     }
 
-    public function storeTodo($request)
+    public function storeTodo(array $data)
     {
-        $authUser = $this->authService->getAuthUser();
-        // Pass only validated data to the repository
-        return $this->todoRepository->storeTodo($authUser, $request->validated());
+        return $this->todoRepository->storeTodo(
+            $this->user(),
+            $data
+        );
     }
 
-    public function getTodoById($id)
+    public function updateTodo(Todo $todo, array $data)
     {
-        $authUser = $this->authService->getAuthUser();
-        return $this->todoRepository->findById($authUser, $id);
+        return $this->todoRepository->updateTodo(
+            $todo,
+            $data
+        );
     }
 
-    public function updateTodo($id, $request)
+    public function deleteTodo(Todo $todo)
     {
-        $todo = $this->getTodoById($id);
-        return $this->todoRepository->updateTodo($todo, $request->all());
-    }
-
-    public function deleteTodo($id)
-    {
-        $todo = $this->getTodoById($id);
         return $this->todoRepository->deleteTodo($todo);
     }
 }

@@ -2,66 +2,139 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Services\TodoService;
 use App\Helper\ApiResponse;
 use App\Http\Requests\StoreTodoRequest;
+use App\Models\Todo;
+use App\Services\TodoService;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
 class TodoController extends Controller
 {
-    public function __construct(protected TodoService $todoService) {}
+    public function __construct(
+        protected TodoService $todoService
+    ) {}
 
     public function index()
     {
         try {
             $todos = $this->todoService->getAllTodos();
-            return ApiResponse::success(self::SUCCESS_MESSAGE, $todos);
+
+            return ApiResponse::success(
+                'Todos fetched successfully',
+                $todos
+            );
         } catch (Exception $e) {
-            Log::error('Error Fetching Todos: ' . $e->getMessage());
-            return ApiResponse::error(self::EXCEPTION_MESSAGE, [], 500);
+            Log::error($e->getMessage());
+
+            return ApiResponse::error(
+                self::EXCEPTION_MESSAGE,
+                [],
+                500
+            );
         }
     }
 
     public function store(StoreTodoRequest $request)
     {
         try {
-            $todo = $this->todoService->storeTodo($request);
-            return ApiResponse::success(self::SUCCESS_MESSAGE, $todo, 201);
+            $todo = $this->todoService->storeTodo($request->validated());
+
+            return ApiResponse::success(
+                'Todo created successfully',
+                $todo,
+                201
+            );
         } catch (Exception $e) {
-            Log::error('Error Storing Todo: ' . $e->getMessage());
-            return ApiResponse::error(self::EXCEPTION_MESSAGE, [], 500);
+            Log::error($e->getMessage());
+
+            return ApiResponse::error(
+                self::EXCEPTION_MESSAGE,
+                [],
+                500
+            );
         }
     }
 
-    public function show($id)
+    public function show(Todo $todo)
     {
         try {
-            $todo = $this->todoService->getTodoById($id);
-            return ApiResponse::success(self::SUCCESS_MESSAGE, $todo);
+            if ($todo->user_id !== $this->todoService->getCurrentUserId()) {
+                return ApiResponse::error(
+                    'Unauthorized',
+                    [],
+                    403
+                );
+            }
+
+            return ApiResponse::success(
+                'Todo fetched successfully',
+                $todo
+            );
         } catch (Exception $e) {
-            return ApiResponse::error('Todo not found', [], 404);
+            return ApiResponse::error(
+                'Todo not found',
+                [],
+                404
+            );
         }
     }
 
-    public function update(Request $request, $id)
+    public function update(StoreTodoRequest $request, Todo $todo)
     {
         try {
-            $todo = $this->todoService->updateTodo($id, $request);
-            return ApiResponse::success('Todo updated successfully', $todo);
+            if ($todo->user_id !== $this->todoService->getCurrentUserId()) {
+                return ApiResponse::error(
+                    'Unauthorized',
+                    [],
+                    403
+                );
+            }
+
+            $updatedTodo = $this->todoService->updateTodo(
+                $todo,
+                $request->validated()
+            );
+
+            return ApiResponse::success(
+                'Todo updated successfully',
+                $updatedTodo
+            );
         } catch (Exception $e) {
-            return ApiResponse::error('Update failed: ' . $e->getMessage(), [], 400);
+            Log::error($e->getMessage());
+
+            return ApiResponse::error(
+                self::EXCEPTION_MESSAGE,
+                [],
+                400
+            );
         }
     }
 
-    public function destroy($id)
+    public function destroy(Todo $todo)
     {
         try {
-            $this->todoService->deleteTodo($id);
-            return ApiResponse::success('Todo deleted successfully');
+            if ($todo->user_id !== auth()->id()) {
+                return ApiResponse::error(
+                    'Unauthorized',
+                    [],
+                    403
+                );
+            }
+
+            $this->todoService->deleteTodo($todo);
+
+            return ApiResponse::success(
+                'Todo deleted successfully'
+            );
         } catch (Exception $e) {
-            return ApiResponse::error('Deletion failed', [], 400);
+            Log::error($e->getMessage());
+
+            return ApiResponse::error(
+                self::EXCEPTION_MESSAGE,
+                [],
+                400
+            );
         }
     }
 }

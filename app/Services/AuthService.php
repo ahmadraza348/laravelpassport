@@ -56,6 +56,6 @@ class AuthService
 
     public function getAuthUser()
     {
-        return Auth::user();
+        return Auth::guard('api')->user();
     }
 }

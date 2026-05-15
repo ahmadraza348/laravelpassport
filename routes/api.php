@@ -11,15 +11,20 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:api');
 
 
+// 1. Public Auth Routes
 Route::prefix('auth')->controller(AuthController::class)->group(function () {
     Route::post('/register', 'register');
     Route::post('/login', 'login');
+});
 
-    Route::middleware('auth:api')->group(function () {
+// 2. Protected Routes (Requires Login)
+Route::middleware('auth:api')->group(function () {
+    
+    Route::prefix('auth')->controller(AuthController::class)->group(function () {
         Route::get('/user-profile', 'userProfile');
-        Route::get('/logout', 'logout');
-        
-        // Move this inside the auth middleware!
-        Route::apiResource('todos', TodoController::class);
+        Route::post('/logout', 'logout');
     });
+
+    Route::apiResource('todos', TodoController::class);
+    
 });
